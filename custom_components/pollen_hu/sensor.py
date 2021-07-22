@@ -73,6 +73,7 @@ class PollenHUSensor(Entity):
 
     @property
     def device_state_attributes(self):
+        koncentraciok=["", "Alacsony", "Közepes", "Magas", "Nagyon magas"]
         attr = {}
         dominant_value = 0
 
@@ -80,11 +81,25 @@ class PollenHUSensor(Entity):
             attr["pollens"] = self._pdata.get('pollens')
 
             for item in self._pdata['pollens']:
-                val = item.get('value')
-                if int(val) > dominant_value:
-                    attr["dominant_pollen_value"] = int(val)
-                    attr["dominant_pollen"] = item.get('name')
-                    dominant_value = int(val)
+                if int(item.get('value'))>dominant_value:
+                    dominant_value=int(item.get('value'))
+
+            attr["dominant_pollen_value"] = dominant_value
+            attr["dominant_pollen"] = ""
+
+            if dominant_value>0:
+                dominansok = []
+                attr["dominant_pollen"]+=koncentraciok[dominant_value] + " koncentrációban "
+                for item in self._pdata['pollens']:
+                    if int(item.get('value'))==dominant_value:
+                        dominansok.append(self.nevelo(item.get('name')) + " " + item.get('name').lower())
+                for i in range(len(dominansok)):
+                    if i>0:
+                        if i==len(dominansok)-1:
+                            attr["dominant_pollen"] += " és "
+                        else:
+                            attr["dominant_pollen"] += ", "
+                    attr["dominant_pollen"] += dominansok[i]
 
         attr["provider"] = CONF_ATTRIBUTION
         return attr
@@ -116,3 +131,8 @@ class PollenHUSensor(Entity):
     @property
     def icon(self):
         return DEFAULT_ICON
+
+    def nevelo(self, szoveg):
+        if szoveg[0].upper() in ['A', 'Á', 'E', 'É', 'I', 'Í', 'O', 'Ó', 'Ö', 'Ő', 'U', 'Ú', 'Ü', 'Ű']:
+            return 'az'
+        return 'a'

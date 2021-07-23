@@ -4,6 +4,7 @@ import logging
 import re
 import voluptuous as vol
 import aiohttp
+import random
 from datetime import timedelta
 
 from homeassistant.components.sensor import PLATFORM_SCHEMA
@@ -73,7 +74,6 @@ class PollenHUSensor(Entity):
 
     @property
     def device_state_attributes(self):
-        koncentraciok=["", "Alacsony", "Közepes", "Magas", "Nagyon magas"]
         attr = {}
         dominant_value = 0
 
@@ -88,21 +88,32 @@ class PollenHUSensor(Entity):
             attr["dominant_pollen"] = ""
 
             if dominant_value>0:
-                dominansok = []
-                attr["dominant_pollen"]+=koncentraciok[dominant_value] + " koncentrációban "
-                for item in self._pdata['pollens']:
-                    if int(item.get('value'))==dominant_value:
-                        dominansok.append(self.nevelo(item.get('name')) + " " + item.get('name').lower())
-                for i in range(len(dominansok)):
-                    if i>0:
-                        if i==len(dominansok)-1:
-                            attr["dominant_pollen"] += " és "
-                        else:
-                            attr["dominant_pollen"] += ", "
-                    attr["dominant_pollen"] += dominansok[i]
+                attr["dominant_pollen_value"] = self.get_dominant_text(dominant_value)
+                if dominant_value>2:
+                    attr["dominant_pollen_value"] += ' ' + random.choice(['illetve','továbbá','azon kívül','ezen felül','és azt mondják,'])+' '
+                    attr["dominant_pollen_value"] += self.get_dominant_text(dominant_value-1).lower()
 
         attr["provider"] = CONF_ATTRIBUTION
         return attr
+    
+    def get_dominant_text(self, level):
+        ret = ""
+        koncentraciok=["", "Alacsony", "Közepes", "Magas", "Nagyon magas"]
+        dominansok = []
+        ret=koncentraciok[level] + " koncentrációban "
+        for item in self._pdata['pollens']:
+            if int(item.get('value'))==level:
+                dominansok.append(self.nevelo(item.get('name')) + " " + item.get('name').lower())
+        for i in range(len(dominansok)):
+            if i>0:
+                if i==len(dominansok)-1:
+                    ret += " és "
+                else:
+                    ret += ", "
+            ret += dominansok[i]
+
+        return ret
+
 
     @asyncio.coroutine
     async def async_update(self):

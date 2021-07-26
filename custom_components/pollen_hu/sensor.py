@@ -88,10 +88,10 @@ class PollenHUSensor(Entity):
             attr["dominant_pollen"] = ""
 
             if dominant_value>0:
-                attr["dominant_pollen_value"] = self.get_dominant_text(dominant_value)
+                attr["dominant_pollen"] = self.get_dominant_text(dominant_value)
                 if dominant_value>2:
-                    attr["dominant_pollen_value"] += ' ' + random.choice(['illetve','továbbá','azon kívül','ezen felül','és azt mondják,'])+' '
-                    attr["dominant_pollen_value"] += self.get_dominant_text(dominant_value-1).lower()
+                    attr["dominant_pollen"] += ' ' + random.choice(['illetve','továbbá','azon kívül','ezen felül','és azt mondják,'])+' '
+                    attr["dominant_pollen"] += self.get_dominant_text(dominant_value-1).lower()
 
         attr["provider"] = CONF_ATTRIBUTION
         return attr

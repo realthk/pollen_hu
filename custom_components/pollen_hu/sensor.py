@@ -102,7 +102,6 @@ class PollenHUSensor(Entity):
         ret = ""
         koncentraciok=["", "Alacsony", "Közepes", "Magas", "Nagyon magas"]
         dominansok = []
-        ret=koncentraciok[level] + " koncentrációban "
         for item in self._pdata['pollens']:
             if int(item.get('value'))==level:
                 dominansok.append(self.nevelo(item.get('name')) + " " + item.get('name').lower())
@@ -113,6 +112,8 @@ class PollenHUSensor(Entity):
                 else:
                     ret += ", "
             ret += dominansok[i]
+        if ret>'':
+            ret=koncentraciok[level] + " koncentrációban " + ret
 
         return ret
 

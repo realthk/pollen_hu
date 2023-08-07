@@ -29,8 +29,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Optional(CONF_NAME, default=DEFAULT_NAME): cv.string,
 })
 
-@asyncio.coroutine
-def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
+async def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
     name = config.get(CONF_NAME)
 
     async_add_devices(
@@ -128,7 +127,6 @@ class PollenHUSensor(Entity):
         return ret
 
 
-    @asyncio.coroutine
     async def async_update(self):
         dominant_value = 0
 
